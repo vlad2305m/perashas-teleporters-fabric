@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.vlad2305m.perashasteleportersfabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ItemFrameEntity_TickMixin",
+    "LevelProperties_SaveMixin",
+    "PearlItem_NoThrowMixin",
+    "PlayerEntity_PortalCreateMixin",
+    "ServerWorld_NetworkManagerMixin",
+    "World_BreakBlockMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
