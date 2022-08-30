@@ -3,6 +3,7 @@ package com.vlad2305m.perashasteleportersfabric.mixin;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vlad2305m.perashasteleportersfabric.TeleporterSettings;
 import com.vlad2305m.perashasteleportersfabric.interfaces.TeleporterEntity;
+import com.vlad2305m.perashasteleportersfabric.interfaces.WorldInterface;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -25,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Mixin(ItemFrameEntity.class)
@@ -64,6 +65,7 @@ public abstract class ItemFrameEntity_TickMixin extends AbstractDecorationEntity
     }
 
     public void breakPortal() throws CommandSyntaxException {
+        if(world.isClient())return;
         if (settings == null) throw new NullPointerException("Perasha's teleporter settings are null on death");
         wasAPortal = true;
         ItemStack itemStack = this.getHeldItemStack();
@@ -74,11 +76,13 @@ public abstract class ItemFrameEntity_TickMixin extends AbstractDecorationEntity
         NbtList attributes = new NbtList();
         if (settings.sticky) attributes.add(NbtString.of(Text.Serializer.toJson(Text.of("\u00A7aSticky"))));
         if (!itemStack.isEmpty()) attributes.add(NbtString.of(Text.Serializer.toJson(Text.of("\u00A77Contains "+itemStack))));
+        if (settings.color != null) attributes.add(NbtString.of("[{\"text\":\"Color:\",\"color\":\"gray\",\"italic\":false},{\"text\":\"█\",\"color\":\""+ String.format("#%02X%02X%02X", settings.color[0], settings.color[1], settings.color[2])+"\",\"italic\":false}" + (settings.secondaryColor == null ? "" : ",{\"text\":\"~\",\"color\":\"gray\"},{\"text\":\"█\",\"color\":\""+ String.format("#%02X%02X%02X", settings.secondaryColor[0], settings.secondaryColor[1], settings.secondaryColor[2])+"\",\"italic\":false}")+']'));
+        if (settings.colorCycle != null && settings.colorCycle.length > 0) attributes.add(NbtString.of("[{\"text\":\"Color:\",\"color\":\"gray\",\"italic\":false},"+String.join(",", Arrays.stream(settings.colorCycle).map((i)->"{\"text\":\"█\",\"color\":\""+ String.format("#%02X%02X%02X", i[0], i[1], i[2])+"\",\"italic\":false}").toArray(String[]::new))+"]"));
         if (!attributes.isEmpty()) portal.getNbt().getCompound("display").put("Lore", attributes);
         this.setHeldItemStack(portal);
         this.dropHeldStack(null,true);
         isAPortal = false;
-
+        ((WorldInterface)world).getManager().removeTeleporter(settings, getUuidAsString());
         settings.destroyStructure(getBlockPos(), world);
         this.kill();
     }
@@ -121,5 +125,5 @@ public abstract class ItemFrameEntity_TickMixin extends AbstractDecorationEntity
     public boolean isAPortal(){return isAPortal;}
     public void setPortal(boolean b){isAPortal = b;}
     public TeleporterSettings getSettings(){return settings;}
-    public void setSettings(TeleporterSettings s){settings = s;}
+    public void setSettings(TeleporterSettings s){settings = s; isAPortal = true;}
 }

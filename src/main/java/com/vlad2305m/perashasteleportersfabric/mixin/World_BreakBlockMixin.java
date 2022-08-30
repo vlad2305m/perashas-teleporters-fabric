@@ -6,7 +6,6 @@ import com.vlad2305m.perashasteleportersfabric.interfaces.TeleporterEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -26,10 +25,6 @@ public abstract class World_BreakBlockMixin {
     @Shadow public abstract <T extends Entity> List<T> getEntitiesByType(TypeFilter<Entity, T> filter, Box box, Predicate<? super T> predicate);
 
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
-
-    //@Inject(method = "removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z", at = @At("HEAD"))
-    //public void cB1(BlockPos pos, boolean move, CallbackInfoReturnable<Boolean> cir){ checkBreak(pos); }
-
     @Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;II)Z", at = @At("HEAD"))
     public void cB2(BlockPos pos, BlockState state, int flags, int maxUpdateDepth, CallbackInfoReturnable<Boolean> cir){ if (!getBlockState(pos).isOf(state.getBlock())) checkBreak(pos); }
 

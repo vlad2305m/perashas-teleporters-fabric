@@ -9,6 +9,7 @@
     "PearlItem_NoThrowMixin",
     "PlayerEntity_PortalCreateMixin",
     "ServerWorld_NetworkManagerMixin",
+    "ServerWorld_NetworkManagerMixin$entityManagerMixin",
     "World_BreakBlockMixin"
   ],
   "client": [
